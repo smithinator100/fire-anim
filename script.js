@@ -2,6 +2,10 @@ const container = document.querySelector('.container');
 const overlay = document.getElementById('overlay');
 const modal = document.getElementById('modal');
 const lottieContainer = document.getElementById('lottie-container');
+const delaySlider = document.getElementById('delay-slider');
+const speedSlider = document.getElementById('speed-slider');
+const delayValue = document.getElementById('delay-value');
+const speedValue = document.getElementById('speed-value');
 
 let lottieAnimation = null;
 
@@ -14,6 +18,11 @@ function initLottie() {
             autoplay: false,
             path: 'lottie/fire-v4.json'
         });
+        
+        // Set initial speed
+        if (lottieAnimation) {
+            lottieAnimation.setSpeed(parseFloat(speedSlider.value));
+        }
     }
 }
 
@@ -27,11 +36,12 @@ function toggleModal() {
         // Initialize Lottie if not already initialized
         initLottie();
         
-        // Play animation when modal opens with 100ms delay
+        // Play animation when modal opens with delay from slider
         if (lottieAnimation) {
+            const delay = parseInt(delaySlider.value);
             setTimeout(() => {
                 lottieAnimation.play();
-            }, 220);
+            }, delay);
         }
     } else {
         // Reset animation when modal closes so it can play again next time
@@ -41,6 +51,20 @@ function toggleModal() {
         }
     }
 }
+
+// Update delay value display
+delaySlider.addEventListener('input', (e) => {
+    delayValue.textContent = e.target.value;
+});
+
+// Update speed value display and apply to animation
+speedSlider.addEventListener('input', (e) => {
+    const speed = parseFloat(e.target.value);
+    speedValue.textContent = speed.toFixed(1);
+    if (lottieAnimation) {
+        lottieAnimation.setSpeed(speed);
+    }
+});
 
 container.addEventListener('click', (e) => {
     // Only toggle if clicking directly on container (not on overlay/modal)
