@@ -24,7 +24,7 @@ function initLottie() {
             renderer: 'svg',
             loop: loopValue > 0,
             autoplay: false,
-            path: 'lottie/fire-v4.json'
+            path: 'lottie/fire-v5.json'
         });
         
         // Set initial speed
