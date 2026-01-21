@@ -4,17 +4,25 @@ const modal = document.getElementById('modal');
 const lottieContainer = document.getElementById('lottie-container');
 const delaySlider = document.getElementById('delay-slider');
 const speedSlider = document.getElementById('speed-slider');
+const loopInput = document.getElementById('loop-input');
 const delayValue = document.getElementById('delay-value');
 const speedValue = document.getElementById('speed-value');
 
 let lottieAnimation = null;
+let loopCount = 0;
+let currentLoop = 0;
+let loopCompleteHandler = null;
 
 function initLottie() {
     if (!lottieAnimation && lottieContainer) {
+        const loopValue = parseInt(loopInput.value);
+        loopCount = loopValue;
+        currentLoop = 0;
+        
         lottieAnimation = lottie.loadAnimation({
             container: lottieContainer,
             renderer: 'svg',
-            loop: false,
+            loop: loopValue > 0,
             autoplay: false,
             path: 'lottie/fire-v4.json'
         });
@@ -22,7 +30,34 @@ function initLottie() {
         // Set initial speed
         if (lottieAnimation) {
             lottieAnimation.setSpeed(parseFloat(speedSlider.value));
+            
+            // Handle loop completion for specific loop count
+            if (loopValue > 0) {
+                loopCompleteHandler = () => {
+                    currentLoop++;
+                    if (currentLoop >= loopCount) {
+                        lottieAnimation.loop = false;
+                        if (loopCompleteHandler) {
+                            lottieAnimation.removeEventListener('loopComplete', loopCompleteHandler);
+                        }
+                    }
+                };
+                lottieAnimation.addEventListener('loopComplete', loopCompleteHandler);
+            }
         }
+    }
+}
+
+function resetLottie() {
+    if (lottieAnimation) {
+        // Remove event listener if it exists
+        if (loopCompleteHandler) {
+            lottieAnimation.removeEventListener('loopComplete', loopCompleteHandler);
+            loopCompleteHandler = null;
+        }
+        lottieAnimation.destroy();
+        lottieAnimation = null;
+        currentLoop = 0;
     }
 }
 
@@ -33,7 +68,8 @@ function toggleModal() {
     modal.classList.toggle('active');
     
     if (isOpening) {
-        // Initialize Lottie if not already initialized
+        // Reset and reinitialize Lottie to apply new loop settings
+        resetLottie();
         initLottie();
         
         // Play animation when modal opens with delay from slider
@@ -63,6 +99,14 @@ speedSlider.addEventListener('input', (e) => {
     speedValue.textContent = speed.toFixed(1);
     if (lottieAnimation) {
         lottieAnimation.setSpeed(speed);
+    }
+});
+
+// Update loop setting - will apply on next modal open
+loopInput.addEventListener('input', (e) => {
+    const value = parseInt(e.target.value);
+    if (value < 0) {
+        e.target.value = 0;
     }
 });
 
