@@ -12,7 +12,7 @@ function initLottie() {
             renderer: 'svg',
             loop: false,
             autoplay: false,
-            path: 'lottie/fire-v2.json'
+            path: 'lottie/fire-v4.json'
         });
     }
 }
