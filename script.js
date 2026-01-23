@@ -24,25 +24,43 @@ function initLottie() {
             renderer: 'svg',
             loop: loopValue > 0,
             autoplay: false,
-            path: 'lottie/fire-v5.json'
+            path: 'lottie/fire-v8.json'
         });
         
-        // Set initial speed
+        // Set initial speed and ensure animation plays fully
         if (lottieAnimation) {
             lottieAnimation.setSpeed(parseFloat(speedSlider.value));
             
-            // Handle loop completion for specific loop count
-            if (loopValue > 0) {
-                loopCompleteHandler = () => {
-                    currentLoop++;
-                    if (currentLoop >= loopCount) {
-                        lottieAnimation.loop = false;
-                        if (loopCompleteHandler) {
-                            lottieAnimation.removeEventListener('loopComplete', loopCompleteHandler);
+            // Ensure animation starts from the beginning
+            lottieAnimation.goToAndStop(0, true);
+            
+            // Set up event listeners once animation data is ready
+            const setupEventListeners = () => {
+                // Handle loop completion for specific loop count
+                if (loopValue > 0) {
+                    loopCompleteHandler = () => {
+                        currentLoop++;
+                        if (currentLoop >= loopCount) {
+                            lottieAnimation.loop = false;
+                            if (loopCompleteHandler) {
+                                lottieAnimation.removeEventListener('loopComplete', loopCompleteHandler);
+                            }
                         }
-                    }
-                };
-                lottieAnimation.addEventListener('loopComplete', loopCompleteHandler);
+                    };
+                    lottieAnimation.addEventListener('loopComplete', loopCompleteHandler);
+                } else {
+                    // For non-looping animations, ensure it plays fully
+                    lottieAnimation.addEventListener('complete', () => {
+                        console.log('Animation completed');
+                    });
+                }
+            };
+            
+            // Set up listeners when data is ready
+            if (lottieAnimation.isLoaded) {
+                setupEventListeners();
+            } else {
+                lottieAnimation.addEventListener('data_ready', setupEventListeners);
             }
         }
     }
@@ -76,6 +94,8 @@ function toggleModal() {
         if (lottieAnimation) {
             const delay = parseInt(delaySlider.value);
             setTimeout(() => {
+                // Ensure animation starts from the beginning and plays fully
+                lottieAnimation.goToAndStop(0, true);
                 lottieAnimation.play();
             }, delay);
         }
